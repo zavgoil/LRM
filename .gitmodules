@@ -1,0 +1,6 @@
+[submodule "workspace/3rdparty/grpc"]
+	path = workspace/3rdparty/grpc
+	url = https://github.com/grpc/grpc
+[submodule "workspace/3rdparty/libpqxx"]
+	path = workspace/3rdparty/libpqxx
+	url = https://github.com/jtv/libpqxx
