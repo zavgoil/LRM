@@ -4,5 +4,6 @@
 
 int UserService::run() {
   util::Log::debug("Starting user-service...");
+  grpc_server_.wait();
   return 0;
 }
