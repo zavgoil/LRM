@@ -8,10 +8,8 @@ set(SRC_FILES src/user-service/user-service.cpp
               src/db/db_manager.cpp
               src/util/log.cpp)
 
-include_directories(include/)
 
 add_executable(user-service src/main.cpp
                             ${SRC_FILES})
-target_include_directories(user-service 
-    PRIVATE "$<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>")
+target_include_directories(user-service PRIVATE include/)
 target_link_libraries(user-service PRIVATE proto pqxx)
