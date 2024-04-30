@@ -1,0 +1,44 @@
+syntax = "proto3";
+
+package user_service;
+
+// SignIn Service
+service SignIn {
+    rpc SignIn (SignInRequest) returns (SignInResponse) {}
+}
+
+message SignInRequest {
+    string login = 1;
+    string password = 2;
+}
+
+message SignInResponse {
+    string token = 1;
+}
+
+// SignUp Service
+service SignUp {
+    rpc SignUp (SignUpRequest) returns (SignUpResponse) {}
+}
+
+message SignUpRequest {
+    string login = 1;
+    string password = 2;
+}
+
+message SignUpResponse {
+    string token = 1;
+}
+
+// Alert Service
+service Alert {
+    rpc Alert (AlertRequest) returns (AlertResponse) {}
+}
+
+message AlertRequest {
+    string user_token = 1;
+}
+
+message AlertResponse {
+    string alert_count = 1;
+}

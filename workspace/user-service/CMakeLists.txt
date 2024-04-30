@@ -1,13 +1,15 @@
 cmake_minimum_required(VERSION 3.22)
 
 project(user-service)
-
 set(CMAKE_CXX_STANDARD 17)
-
 set(SRC_FILES src/user-service/user-service.cpp
+              src/user-service/sign-in-service.cpp
+              src/user-service/sign-up-service.cpp
+              src/db/db_manager.cpp
               src/util/log.cpp)
 
-include_directories(include/)
 
 add_executable(user-service src/main.cpp
                             ${SRC_FILES})
+target_include_directories(user-service PRIVATE include/)
+target_link_libraries(user-service PRIVATE proto pqxx)
