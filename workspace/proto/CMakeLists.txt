@@ -7,7 +7,7 @@ find_package(gRPC CONFIG REQUIRED)
 
 set(PROTO_FILES
     user-service.proto
-    notification-service.proto)
+    )
 
 set(PROTO_PATH ${CMAKE_CURRENT_BINARY_DIR}/include/proto)
 
