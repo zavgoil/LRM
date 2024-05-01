@@ -3,9 +3,9 @@
 #include <db/db_manager.h>
 #include <proto/user-service.grpc.pb.h>
 
-class AuthService : public user_service::AuthService::Service {
+class AuthGrpcService : public user_service::AuthService::Service {
  public:
-  AuthService(DbManager& db);
+  AuthGrpcService(DbManager& db);
   ::grpc::Status SignUp(::grpc::ServerContext* context,
                         const ::user_service::SignUpRequest* request,
                         ::user_service::SignUpResponse* response) override;

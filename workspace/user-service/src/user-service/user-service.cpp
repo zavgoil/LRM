@@ -7,9 +7,9 @@ int UserService::run(int argc, char const *argv[]) {
 
   auto config = getConfig(argc, argv);
 
-  grpc_server_ = std::make_unique<GrpcServer>(config.rpc_map.user_service.uri,
-                                              config.rpc_map.user_service.port,
-                                              db_manager_);
+  grpc_server_ = std::make_unique<UserGrpcServer>(
+      config.rpc_map.user_service.uri, config.rpc_map.user_service.port,
+      db_manager_);
   grpc_server_->wait();
   return 0;
 }

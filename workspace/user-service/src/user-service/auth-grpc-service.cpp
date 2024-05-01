@@ -1,10 +1,11 @@
-#include <user-service/auth-service.hpp>
+#include <user-service/auth-grpc-service.hpp>
 
-AuthService::AuthService(DbManager& db) : db_(db) {}
+AuthGrpcService::AuthGrpcService(DbManager& db) : db_(db) {}
 
-::grpc::Status AuthService::SignUp(::grpc::ServerContext* context,
-                                   const ::user_service::SignUpRequest* request,
-                                   ::user_service::SignUpResponse* response) {
+::grpc::Status AuthGrpcService::SignUp(
+    ::grpc::ServerContext* context,
+    const ::user_service::SignUpRequest* request,
+    ::user_service::SignUpResponse* response) {
   std::string token = "";
   try {
     token = db_.addUser(request->login(), request->password());
@@ -23,9 +24,10 @@ AuthService::AuthService(DbManager& db) : db_(db) {}
   return ::grpc::Status(::grpc::StatusCode::OK, "");
 }
 
-::grpc::Status AuthService::SignIn(::grpc::ServerContext* context,
-                                   const ::user_service::SignInRequest* request,
-                                   ::user_service::SignInResponse* response) {
+::grpc::Status AuthGrpcService::SignIn(
+    ::grpc::ServerContext* context,
+    const ::user_service::SignInRequest* request,
+    ::user_service::SignInResponse* response) {
   std::string token = "";
   try {
     token = db_.getUuid(request->login(), request->password());

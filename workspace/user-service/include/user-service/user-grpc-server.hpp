@@ -3,11 +3,11 @@
 #include <db/db_manager.h>
 #include <grpcpp/grpcpp.h>
 
-#include <user-service/auth-service.hpp>
+#include <user-service/auth-grpc-service.hpp>
 
-class GrpcServer {
+class UserGrpcServer {
  public:
-  GrpcServer(std::string grpc_uri, int grpc_port, DbManager& db)
+  UserGrpcServer(std::string grpc_uri, int grpc_port, DbManager& db)
       : auth_service_(db) {
     std::string addr = grpc_uri + ":" + std::to_string(grpc_port);
     builder_.AddListeningPort(addr, grpc::InsecureServerCredentials());
@@ -18,10 +18,10 @@ class GrpcServer {
 
   void wait() { server_->Wait(); }
 
-  ~GrpcServer() { server_->Shutdown(); }
+  ~UserGrpcServer() { server_->Shutdown(); }
 
  private:
   grpc::ServerBuilder builder_;
   std::unique_ptr<grpc::Server> server_;
-  AuthService auth_service_;
+  AuthGrpcService auth_service_;
 };
