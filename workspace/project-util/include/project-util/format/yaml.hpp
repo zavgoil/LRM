@@ -27,12 +27,14 @@ class YamlFormat {
   }
 
   virtual ~YamlFormat() = default;
-  inline std::string to_yaml() { return to_yaml(dynamic_cast<T&>(*this)); }
+  inline std::string to_yaml() {
+    return to_yaml(dynamic_cast<const T&>(*this));
+  }
   inline void from_yaml(const std::string& yaml) {
     return from_yaml(dynamic_cast<T&>(*this), yaml);
   }
   inline void to_yaml_file(const std::string& file_path) {
-    return to_yaml_file(dynamic_cast<T&>(*this), file_path);
+    return to_yaml_file(dynamic_cast<const T&>(*this), file_path);
   }
   inline void from_yaml_file(const std::string& file_path) {
     return from_yaml_file(dynamic_cast<T&>(*this), file_path);
