@@ -12,4 +12,4 @@ set(SRC_FILES src/user-service/user-service.cpp
 add_executable(user-service src/main.cpp
                             ${SRC_FILES})
 target_include_directories(user-service PRIVATE include/)
-target_link_libraries(user-service PRIVATE proto pqxx)
+target_link_libraries(user-service PRIVATE project-util proto pqxx)

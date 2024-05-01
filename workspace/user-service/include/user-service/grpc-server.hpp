@@ -8,9 +8,10 @@
 
 class GrpcServer {
  public:
-  GrpcServer(DbManager& db) : sign_in_service_(db), sign_up_service_(db) {
-    builder_.AddListeningPort("localhost:50051",
-                              grpc::InsecureServerCredentials());
+  GrpcServer(std::string grpc_uri, int grpc_port, DbManager& db)
+      : sign_in_service_(db), sign_up_service_(db) {
+    std::string addr = grpc_uri + ":" + std::to_string(grpc_port);
+    builder_.AddListeningPort(addr, grpc::InsecureServerCredentials());
     builder_.RegisterService(&sign_in_service_);
     builder_.RegisterService(&sign_up_service_);
 
