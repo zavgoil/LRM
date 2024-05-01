@@ -3,9 +3,11 @@
 #include <db/db_manager.h>
 #include <proto/user-service.grpc.pb.h>
 
+#include <memory>
+
 class AuthGrpcService : public user_service::AuthService::Service {
  public:
-  AuthGrpcService(DbManager& db);
+  AuthGrpcService(std::shared_ptr<DbManager> db);
   ::grpc::Status SignUp(::grpc::ServerContext* context,
                         const ::user_service::SignUpRequest* request,
                         ::user_service::SignUpResponse* response) override;
@@ -14,5 +16,5 @@ class AuthGrpcService : public user_service::AuthService::Service {
                         ::user_service::SignInResponse* response) override;
 
  private:
-  DbManager& db_;
+  std::shared_ptr<DbManager> db_;
 };

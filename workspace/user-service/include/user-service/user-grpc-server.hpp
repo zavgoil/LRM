@@ -7,7 +7,8 @@
 
 class UserGrpcServer {
  public:
-  UserGrpcServer(std::string grpc_uri, int grpc_port, DbManager& db)
+  UserGrpcServer(const std::string& grpc_uri, const int& grpc_port,
+                 std::shared_ptr<DbManager> db)
       : auth_service_(db) {
     std::string addr = grpc_uri + ":" + std::to_string(grpc_port);
     builder_.AddListeningPort(addr, grpc::InsecureServerCredentials());

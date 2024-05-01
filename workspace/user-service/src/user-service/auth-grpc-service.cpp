@@ -1,6 +1,6 @@
 #include <user-service/auth-grpc-service.hpp>
 
-AuthGrpcService::AuthGrpcService(DbManager& db) : db_(db) {}
+AuthGrpcService::AuthGrpcService(std::shared_ptr<DbManager> db) : db_(db) {}
 
 ::grpc::Status AuthGrpcService::SignUp(
     ::grpc::ServerContext* context,
@@ -8,7 +8,7 @@ AuthGrpcService::AuthGrpcService(DbManager& db) : db_(db) {}
     ::user_service::SignUpResponse* response) {
   std::string token = "";
   try {
-    token = db_.addUser(request->login(), request->password());
+    token = db_->addUser(request->login(), request->password());
   } catch (LoginAlreadyExists const& e) {
     return ::grpc::Status(::grpc::StatusCode::ALREADY_EXISTS,
                           "Login already exists");
@@ -30,7 +30,7 @@ AuthGrpcService::AuthGrpcService(DbManager& db) : db_(db) {}
     ::user_service::SignInResponse* response) {
   std::string token = "";
   try {
-    token = db_.getUuid(request->login(), request->password());
+    token = db_->getUuid(request->login(), request->password());
   } catch (UserNotFound const& e) {
     return ::grpc::Status(::grpc::StatusCode::NOT_FOUND, "User not found");
   } catch (WrongPassword const& e) {
