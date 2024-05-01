@@ -30,12 +30,14 @@ class JsonFormat {
   }
 
   virtual ~JsonFormat() = default;
-  inline std::string to_json() { return to_json(dynamic_cast<T&>(*this)); }
+  inline std::string to_json() const {
+    return to_json(dynamic_cast<const T&>(*this));
+  }
   inline void from_json(const std::string& json) {
     return from_json(dynamic_cast<T&>(*this), json);
   }
-  inline void to_json_file(const std::string& file_path) {
-    return to_json_file(dynamic_cast<T&>(*this), file_path);
+  inline void to_json_file(const std::string& file_path) const {
+    return to_json_file(dynamic_cast<const T&>(*this), file_path);
   }
   inline void from_json_file(const std::string& file_path) {
     return from_json_file(dynamic_cast<T&>(*this), file_path);
