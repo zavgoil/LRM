@@ -12,3 +12,7 @@ add_executable(user-service src/main.cpp
                             ${SRC_FILES})
 target_include_directories(user-service PRIVATE include/)
 target_link_libraries(user-service PRIVATE project-util proto pqxx)
+
+target_compile_definitions(user-service PRIVATE 
+                           RPC_MAP_PATH="${PROJECT_UTIL_RPC_MAP_PATH}"
+                           DB_OPTION_PATH="${CMAKE_CURRENT_SOURCE_DIR}/config/db_option.yaml")
