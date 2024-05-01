@@ -18,6 +18,12 @@ void DbManager::prepareQuery(std::string table_name) {
           " (uuid, login, password) VALUES (gen_random_uuid(), $1, $2);");
 
   conn_.prepare("get_uuid", "SELECT * FROM " + table_name + " WHERE login=$1");
+
+  conn_.prepare("set_clients", "UPDATE " + table_name +
+                                   " SET clients = $2::json WHERE uuid=$1;");
+
+  conn_.prepare("get_clients",
+                "SELECT clients FROM " + table_name + " WHERE uuid=$1;");
 }
 
 DbManager::~DbManager() {
@@ -57,11 +63,10 @@ std::string DbManager::getUuid(const std::string login,
   pqxx::row query_result;
   try {
     query_result = query.exec_prepared1("get_uuid", login);
+    query.commit();
   } catch (pqxx::unexpected_rows const& e) {
     throw UserNotFound{"User not found"};
   }
-
-  query.commit();
 
   if (query_result.empty()) throw UserNotFound{"User not found"};
 
@@ -73,4 +78,47 @@ std::string DbManager::getUuid(const std::string login,
     throw WrongPassword{"Wrong password"};
 
   return query_result.at(query_result.column_number("uuid")).as<std::string>();
+}
+
+void DbManager::setClients(const std::string& token,
+                           const NotificationClients& clients) {
+  if (!conn_.is_open()) {
+    throw std::runtime_error{"Connection failed"};
+  }
+
+  pqxx::work query(conn_);
+  pqxx::result query_result;
+
+  try {
+    query_result =
+        query.exec_prepared0("set_clients", token, clients.to_json());
+    query.commit();
+  } catch (std::runtime_error& e) {
+    throw UserNotFound{"User not found"};
+  }
+}
+
+NotificationClients DbManager::getClients(const std::string& token) {
+  if (!conn_.is_open()) {
+    throw std::runtime_error{"Connection failed"};
+  }
+
+  pqxx::work query(conn_);
+  pqxx::row query_result;
+  NotificationClients clients{};
+
+  try {
+    query_result = query.exec_prepared1("get_clients", token);
+    query.commit();
+  } catch (std::runtime_error& e) {
+    throw UserNotFound{"User not found"};
+  }
+
+  if (query_result.empty()) throw UserNotFound{"User not found"};
+
+  auto query_clients =
+      query_result.at(query_result.column_number("clients")).as<std::string>();
+  clients.from_json(query_clients);
+
+  return clients;
 }

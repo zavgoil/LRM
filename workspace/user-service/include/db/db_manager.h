@@ -1,5 +1,7 @@
 #pragma once
+
 #include <config/db_option.hpp>
+#include <notification-clients/notification-clients.hpp>
 #include <pqxx/pqxx>
 #include <string>
 
@@ -12,6 +14,9 @@ class DbManager {
 
   std::string addUser(const std::string login, const std::string password);
   std::string getUuid(const std::string login, const std::string password);
+
+  void setClients(const std::string& token, const NotificationClients& clients);
+  NotificationClients getClients(const std::string& token);
 
  private:
   pqxx::connection conn_;
