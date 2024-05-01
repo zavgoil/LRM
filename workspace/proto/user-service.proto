@@ -3,8 +3,9 @@ syntax = "proto3";
 package user_service;
 
 // SignIn Service
-service SignIn {
+service AuthService {
     rpc SignIn (SignInRequest) returns (SignInResponse) {}
+    rpc SignUp (SignUpRequest) returns (SignUpResponse) {}
 }
 
 message SignInRequest {
@@ -14,11 +15,6 @@ message SignInRequest {
 
 message SignInResponse {
     string token = 1;
-}
-
-// SignUp Service
-service SignUp {
-    rpc SignUp (SignUpRequest) returns (SignUpResponse) {}
 }
 
 message SignUpRequest {

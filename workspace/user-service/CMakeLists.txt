@@ -3,8 +3,7 @@ cmake_minimum_required(VERSION 3.22)
 project(user-service)
 set(CMAKE_CXX_STANDARD 17)
 set(SRC_FILES src/user-service/user-service.cpp
-              src/user-service/sign-in-service.cpp
-              src/user-service/sign-up-service.cpp
+              src/user-service/auth-service.cpp
               src/db/db_manager.cpp
               src/util/log.cpp)
 
