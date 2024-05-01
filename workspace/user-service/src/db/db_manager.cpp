@@ -5,16 +5,19 @@
 
 #include "util/log.hpp"
 
-DbManager::DbManager() : conn_{DB_CONNECT_OPTIONS} {
+DbManager::DbManager(const DbOption& db_option)
+    : conn_{db_option.uri + "/" + db_option.name} {
   if (!conn_.is_open()) throw std::runtime_error{"Connection failed"};
+  prepareQuery(db_option.schema + "." + db_option.user_table_name);
+}
 
+void DbManager::prepareQuery(std::string table_name) {
   conn_.prepare(
       "insert_user",
-      "INSERT INTO " + DB_USER_TABLE +
+      "INSERT INTO " + table_name +
           " (uuid, login, password) VALUES (gen_random_uuid(), $1, $2);");
 
-  conn_.prepare("get_uuid",
-                "SELECT * FROM " + DB_USER_TABLE + " WHERE login=$1");
+  conn_.prepare("get_uuid", "SELECT * FROM " + table_name + " WHERE login=$1");
 }
 
 DbManager::~DbManager() {

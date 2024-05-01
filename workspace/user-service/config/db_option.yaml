@@ -1,0 +1,4 @@
+name: "danger-signal"
+uri: "postgresql://root:root@172.21.0.10"
+schema: "app"
+user_table_name: "user" 

@@ -7,6 +7,8 @@ int UserService::run(int argc, char const *argv[]) {
 
   auto config = getConfig(argc, argv);
 
+  db_manager_ = std::make_shared<DbManager>(config.db_option);
+
   grpc_server_ = std::make_unique<UserGrpcServer>(
       config.rpc_map.user_service.uri, config.rpc_map.user_service.port,
       db_manager_);
@@ -14,12 +16,10 @@ int UserService::run(int argc, char const *argv[]) {
   return 0;
 }
 
+// #TODO: добавить возможность указывать конфиги при запуске
 Config UserService::getConfig(int argc, char const *argv[]) {
-  if (argc < 2) throw std::logic_error("args not set");
-
   Config config;
-  std::string rpc_map_path = argv[1];
-  config.rpc_map.from_yaml_file(rpc_map_path);
-
+  config.rpc_map.from_yaml_file(RPC_MAP_PATH);
+  config.db_option.from_yaml_file(DB_OPTION_PATH);
   return config;
 }
