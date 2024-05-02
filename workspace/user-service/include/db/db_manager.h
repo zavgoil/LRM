@@ -1,4 +1,7 @@
 #pragma once
+
+#include <config/db_option.hpp>
+#include <notification-clients/notification-clients.hpp>
 #include <pqxx/pqxx>
 #include <string>
 
@@ -6,20 +9,19 @@
 
 class DbManager {
  public:
-  DbManager();
+  DbManager(const DbOption& db_option);
   ~DbManager();
 
   std::string addUser(const std::string login, const std::string password);
   std::string getUuid(const std::string login, const std::string password);
 
+  void setClients(const std::string& token, const NotificationClients& clients);
+  NotificationClients getClients(const std::string& token);
+
  private:
   pqxx::connection conn_;
+  void prepareQuery(std::string table_name);
 
-  inline const static std::string DB_NAME = "danger-signal";
-  inline const static std::string DB_CONNECT_OPTIONS =
-      "postgresql://root:root@172.21.0.10/" + DB_NAME;
-  inline const static std::string DB_SCHEMA = "app";
-  inline const static std::string DB_USER_TABLE = DB_SCHEMA + ".user";
   // Струтура БД:
 
   // clang-format off
@@ -33,5 +35,6 @@ class DbManager {
   //     "user_pkey" PRIMARY KEY, btree (uuid, login)
   //     "user_login_key" UNIQUE CONSTRAINT, btree (login)
   //     "user_uuid_key" UNIQUE CONSTRAINT, btree (uuid)
+  //
   // clang-format on
 };
