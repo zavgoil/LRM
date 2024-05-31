@@ -15,16 +15,22 @@ qt_add_executable(appgui-client
     src/app-backend/app-backend.cpp
 )
 
-target_include_directories(appgui-client PUBLIC include/app-backend)
+target_include_directories(appgui-client PUBLIC include include/app-backend)
 qt_add_qml_module(appgui-client
     URI app
     VERSION 1.0
     QML_FILES 
     qml/Main.qml
 
-    qml/SignInPage.qml
-    qml/SignUpPage.qml
+    qml/page/SignInPage.qml
+    qml/page/SignUpPage.qml
+    qml/page/PersonalAreaPage.qml
 
+    qml/subpage/personal-area/MainSubpage.qml
+    qml/subpage/personal-area/ContactsSubpage.qml
+    qml/subpage/personal-area/SettingsSubpage.qml
+
+    qml/widget/AlarmButtonWidget.qml
     qml/widget/SignInWidget.qml
     qml/widget/SignUpWidget.qml
 )
@@ -41,8 +47,11 @@ set_target_properties(appgui-client PROPERTIES
 )
 
 target_link_libraries(appgui-client
-    PRIVATE Qt6::Quick Qt6::QuickControls2 proto
+    PRIVATE Qt6::Quick Qt6::QuickControls2 proto project-util
 )
+
+target_compile_definitions(appgui-client PRIVATE 
+                           RPC_MAP_PATH="${PROJECT_UTIL_RPC_MAP_PATH}")
 
 include(GNUInstallDirs)
 install(TARGETS appgui-client

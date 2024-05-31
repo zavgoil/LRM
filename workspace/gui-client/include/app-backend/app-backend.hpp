@@ -5,19 +5,19 @@
 
 #include <QObject>
 #include <QQmlEngine>
+#include <config/config.hpp>
+#include <memory>
 
 class AppBackend : public QObject {
   Q_OBJECT
-  QML_ELEMENT
-  QML_SINGLETON
+
  public:
+  AppBackend(int argc, char* argv[]);
+
   Q_INVOKABLE void signIn(const QString& username, const QString& password);
   Q_INVOKABLE void signUp(const QString& username, const QString& password);
 
  private:
-  user_service::SignIn::Stub sign_in_service_{grpc::CreateChannel(
-      "localhost:50051", grpc::InsecureChannelCredentials())};
-  user_service::SignUp::Stub sign_up_service_{grpc::CreateChannel(
-      "localhost:50051", grpc::InsecureChannelCredentials())};
-  ;
+  Config config_;
+  std::unique_ptr<user_service::AuthService::Stub> auth_service_{nullptr};
 };

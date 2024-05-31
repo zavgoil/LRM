@@ -1,7 +1,7 @@
 import QtQuick
 import QtQuick.Controls.Material
 import QtQuick.Layouts
-import "./widget"
+import "./../widget"
 
 GridLayout{
     Layout.alignment: Qt.AlignHCenter | Qt.AlignVCenter
@@ -10,12 +10,7 @@ GridLayout{
 
     columns: 1
 
-    SignInWidget{
-    }
-    Button{
-        Layout.alignment: Qt.AlignHCenter | Qt.AlignVCenter
-        text:"Зарегестрироваться"
-        onClicked: changePage("SignUpPage.qml")
+    SignUpWidget{
     }
 }
 

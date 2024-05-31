@@ -1,5 +1,14 @@
 #include <QDebug>
-#include <app-backend.hpp>
+#include <app-backend/app-backend.hpp>
+#include <thread>
+
+AppBackend::AppBackend(int argc, char* argv[]) {
+  config_.read(argc, argv);
+  auth_service_ = std::make_unique<user_service::AuthService::Stub>(
+      grpc::CreateChannel(config_.rpc_map.user_service.uri + ":" +
+                              std::to_string(config_.rpc_map.user_service.port),
+                          grpc::InsecureChannelCredentials()));
+}
 
 void AppBackend::signIn(const QString& username, const QString& password) {
   grpc::ClientContext context{};
@@ -9,7 +18,9 @@ void AppBackend::signIn(const QString& username, const QString& password) {
   request.set_login(username.toStdString());
   request.set_password(password.toStdString());
 
-  auto status = sign_in_service_.SignIn(&context, request, &responce);
+  if (auth_service_ == nullptr)
+    throw std::logic_error("Auth service not inited");
+  auto status = auth_service_->SignIn(&context, request, &responce);
 
   if (!status.ok()) {
     qDebug() << "Error " << status.error_code() << ":"
@@ -20,6 +31,7 @@ void AppBackend::signIn(const QString& username, const QString& password) {
 }
 
 void AppBackend::signUp(const QString& username, const QString& password) {
+  std::this_thread::sleep_for(std::chrono::seconds(5));
   grpc::ClientContext context{};
   user_service::SignUpRequest request{};
   user_service::SignUpResponse responce{};
@@ -27,7 +39,9 @@ void AppBackend::signUp(const QString& username, const QString& password) {
   request.set_login(username.toStdString());
   request.set_password(password.toStdString());
 
-  auto status = sign_up_service_.SignUp(&context, request, &responce);
+  if (auth_service_ == nullptr)
+    throw std::logic_error("Auth service not inited");
+  auto status = auth_service_->SignUp(&context, request, &responce);
 
   if (!status.ok()) {
     qDebug() << "Error " << status.error_code() << ":"
