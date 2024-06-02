@@ -1,6 +1,7 @@
 #include <QDebug>
 #include <app-backend/app-backend.hpp>
 #include <thread>
+#include <util/guard.hpp>
 
 AppBackend::AppBackend(int argc, char* argv[]) {
   config_.read(argc, argv);
@@ -11,42 +12,71 @@ AppBackend::AppBackend(int argc, char* argv[]) {
 }
 
 void AppBackend::signIn(const QString& username, const QString& password) {
-  grpc::ClientContext context{};
   user_service::SignInRequest request{};
-  user_service::SignInResponse responce{};
+
+  if (auth_service_ == nullptr)
+  {
+    qDebug() << "Error: Auth service not inited";
+    emit showError("Error: Auth service not inited");
+    return;
+  }
 
   request.set_login(username.toStdString());
   request.set_password(password.toStdString());
 
-  if (auth_service_ == nullptr)
-    throw std::logic_error("Auth service not inited");
-  auto status = auth_service_->SignIn(&context, request, &responce);
+  if (worker_.joinable()) worker_.join();
+  worker_ = std::thread([this](const user_service::SignInRequest request) {
+      Guard g(std::bind(&AppBackend::closeLoadingPopup, this));
+      emit openLoadingPopup();
 
-  if (!status.ok()) {
-    qDebug() << "Error " << status.error_code() << ":"
-             << status.error_message();
-  } else {
-    qDebug() << "Success. Token - " << responce.token();
-  }
+      grpc::ClientContext context{};
+      user_service::SignInResponse response{};
+
+      auto status = auth_service_->SignIn(&context, request, &response);
+
+      if (!status.ok()) {
+        qDebug() << "Error " << status.error_code() << ":"
+                 << status.error_message();
+        emit showError(QString::fromStdString("Error " +
+                                        std::to_string(status.error_code()) +
+                                        ":" + status.error_message()));
+      } else {
+        qDebug() << "Success. Token - " << response.token();
+        emit signInDone();
+      }
+  }, std::move(request));
 }
 
 void AppBackend::signUp(const QString& username, const QString& password) {
-  std::this_thread::sleep_for(std::chrono::seconds(5));
-  grpc::ClientContext context{};
   user_service::SignUpRequest request{};
-  user_service::SignUpResponse responce{};
+
+  if (auth_service_ == nullptr) {
+    qDebug() << "Error: Auth service not inited";
+    emit showError("Error: Auth service not inited");
+    return;
+  }
 
   request.set_login(username.toStdString());
   request.set_password(password.toStdString());
 
-  if (auth_service_ == nullptr)
-    throw std::logic_error("Auth service not inited");
-  auto status = auth_service_->SignUp(&context, request, &responce);
+  if (worker_.joinable()) worker_.join();
+  worker_ = std::thread([this](const user_service::SignUpRequest request) {
+    Guard g(std::bind(&AppBackend::closeLoadingPopup, this));
+    emit openLoadingPopup();
 
-  if (!status.ok()) {
-    qDebug() << "Error " << status.error_code() << ":"
-             << status.error_message();
-  } else {
-    qDebug() << "Success. Token - " << responce.token();
-  }
+    grpc::ClientContext context{};
+    user_service::SignUpResponse response{};
+
+    auto status = auth_service_->SignUp(&context, request, &response);
+    if (!status.ok()) {
+      qDebug() << "Error " << status.error_code() << ":"
+               << status.error_message();
+      emit showError(QString::fromStdString("Error " +
+                                       std::to_string(status.error_code()) +
+                                       ":" + status.error_message()));
+    } else {
+      qDebug() << "Success. Token - " << response.token();
+      emit signUpDone();
+    }
+  }, std::move(request));
 }
