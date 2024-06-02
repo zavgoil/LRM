@@ -13,6 +13,8 @@ qt_add_executable(appgui-client
 
     include/app-backend/app-backend.hpp
     src/app-backend/app-backend.cpp
+
+    include/app-backend/contact_list_model.hpp
 )
 
 target_include_directories(appgui-client PUBLIC include include/app-backend)
@@ -33,6 +35,7 @@ qt_add_qml_module(appgui-client
     qml/widget/AlarmButtonWidget.qml
     qml/widget/SignInWidget.qml
     qml/widget/SignUpWidget.qml
+    qml/widget/ContactListWidget.qml
 )
 
 # Qt for iOS sets MACOSX_BUNDLE_GUI_IDENTIFIER automatically since Qt 6.1.
