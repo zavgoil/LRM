@@ -72,6 +72,7 @@ std::string DbManager::getUuid(const std::string login,
 
   auto query_password =
       query_result.at(query_result.column_number("password")).as<std::string>();
+  rtrim(query_password);
 
   // TODO: вынести шифрование на уровень клиента
   if (query_password != Hash::sha256(password))

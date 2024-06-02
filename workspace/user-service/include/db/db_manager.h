@@ -37,4 +37,29 @@ class DbManager {
   //     "user_uuid_key" UNIQUE CONSTRAINT, btree (uuid)
   //
   // clang-format on
+
+  //  DROP TABLE IF EXISTS app."user";
+
+  // CREATE TABLE IF NOT EXISTS app."user"
+  // (
+  //     uuid uuid NOT NULL,
+  //     login character(255) COLLATE pg_catalog."default" NOT NULL,
+  //     password character(255) COLLATE pg_catalog."default" NOT NULL,
+  //     clients json DEFAULT '{}'::json,
+  //     CONSTRAINT user_pkey PRIMARY KEY (uuid, login),
+  //     CONSTRAINT user_login_key UNIQUE (login),
+  //     CONSTRAINT user_uuid_key UNIQUE (uuid)
+  // )
+
+  // TABLESPACE pg_default;
+
+  // ALTER TABLE IF EXISTS app."user"
+  //     OWNER to root;
+
+  void rtrim(std::string& s) {
+    s.erase(std::find_if(s.rbegin(), s.rend(),
+                         [](unsigned char ch) { return !std::isspace(ch); })
+                .base(),
+            s.end());
+  }
 };
