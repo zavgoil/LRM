@@ -1,4 +1,4 @@
-import QtQuick
+    import QtQuick
 import QtQuick.Window
 import QtQuick.Layouts
 
@@ -10,9 +10,9 @@ import QtQuick.Controls.Material
 import QtQuick.Dialogs 
 
 Window {
-    property string defaultPage: "PersonalAreaPage.qml"
-    
     id: root
+    property string defaultPage: "SignUpPage.qml"
+    
     width: 1280
     height: 960
     visible: true
@@ -23,6 +23,11 @@ Window {
         pageLoader.source = "page/" + page_name
     }
 
+    function showError(error_message)
+    {
+        showDialog("Ошибка", error_message, popupEmptyOkButton)
+    }
+
     function showDialog(title, message, buttonListModel) {
         popupDialog.dialogTitle = title
         popupDialog.dialogMessage = message
@@ -30,11 +35,19 @@ Window {
         popupDialog.open()
     }
 
-    function wait()
-    {
-        loadingPopup.open()
-        
-        loadingPopup.close()
+    Connections {
+        target: AppBackend
+        function onOpenLoadingPopup() {
+            loadingPopup.open()
+        }
+
+        function onCloseLoadingPopup() {
+            loadingPopup.close()
+        }
+
+        function onShowError(error_message) {
+            showError(error_message)
+        }
     }
 
     Component.onCompleted: {
@@ -47,13 +60,13 @@ Window {
     }
 
     Dialog {
+        id: popupDialog
         property string dialogTitle: ""
         property string dialogMessage: ""
         property variant dialogButtonListModel: ListModel{
             ListElement{buttonText: ""; buttonCallback: function(){}}
         }
         
-        id: popupDialog
         modal: true
         Material.elevation: 3
         title: dialogTitle
@@ -63,9 +76,12 @@ Window {
 
         ColumnLayout {
             anchors.fill: parent
-
+            
             Item {Layout.fillHeight: true}
             Text{
+                Layout.maximumWidth: parent.width
+                wrapMode: Text.WordWrap
+                elide: Text.ElideRight
                 text: qsTr(popupDialog.dialogMessage)
             }
             Item {Layout.fillHeight: true}
@@ -90,6 +106,7 @@ Window {
 
     Popup {
         id: loadingPopup
+        
         anchors.centerIn: parent
         modal: true
         focus: true
@@ -109,6 +126,14 @@ Window {
 
                 Material.foreground: Material.accent
                 Material.accent: Material.Blue
+        }
+    }
+
+    ListModel{
+        id: popupEmptyOkButton      
+        ListElement{ 
+            buttonText: "Ок"; 
+            buttonCallback: function(){} 
         }
     }
 }
