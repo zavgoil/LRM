@@ -44,6 +44,7 @@ Rectangle {
             Material.accent: Material.Blue
             Layout.fillWidth: true
             onClicked: {
+                AppBackend.signIn(usernameInput.text, passwordInput.text)
             }
         }
     }
@@ -68,6 +69,13 @@ Rectangle {
         }
         onClicked: {
             changePage("SignUpPage.qml")
+        }
+    }
+
+    Connections {
+        target: AppBackend
+        function onSignInDone() {
+            changePage("PersonalAreaPage.qml")
         }
     }
 }

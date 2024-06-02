@@ -51,7 +51,6 @@ Rectangle {
             Material.accent: Material.Blue
             Layout.fillWidth: true
             onClicked: {
-                // showDialog("Регистрация", "Регистрцаия пройдена успешно", popupRegisterDoneButtons)
                 AppBackend.signUp(usernameInput.text, passwordInput.text)
             }
         }
@@ -81,10 +80,16 @@ Rectangle {
     }
 
 
+    Connections {
+        target: AppBackend
+        function onSignUpDone() {
+            showDialog("Регистрация", "Регистрцаия пройдена успешно", signUpDoneButton)
+        }
+    }
     ListModel{
-        id: popupRegisterDoneButtons      
+        id: signUpDoneButton      
         ListElement{ 
-            buttonText: "ok"; 
+            buttonText: "Ок"; 
             buttonCallback: function(){changePage("SignInPage.qml")} 
         }
     }
