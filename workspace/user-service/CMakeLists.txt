@@ -5,6 +5,7 @@ set(CMAKE_CXX_STANDARD 17)
 set(SRC_FILES src/user-service/user-service.cpp
               src/user-service/auth-grpc-service.cpp
               src/user-service/notif-client-grpc-service.cpp
+              src/notification-client/notification-client-json.cpp
               src/db/db_manager.cpp
               src/util/log.cpp)
 

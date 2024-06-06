@@ -1,5 +1,5 @@
 #include <user-service/auth-grpc-service.hpp>
-
+#include <db/db_exception.h>
 AuthGrpcService::AuthGrpcService(std::shared_ptr<DbManager> db) : db_(db) {}
 
 ::grpc::Status AuthGrpcService::SignUp(

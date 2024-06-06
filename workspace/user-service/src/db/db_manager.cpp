@@ -2,7 +2,7 @@
 #include <db/hash.h>
 
 #include <stdexcept>
-
+#include "db/db_exception.h"
 #include "util/log.hpp"
 
 DbManager::DbManager(const DbOption& db_option)
@@ -82,7 +82,7 @@ std::string DbManager::getUuid(const std::string login,
 }
 
 void DbManager::setClients(const std::string& token,
-                           const NotificationClients& clients) {
+                           const ::google::protobuf::RepeatedPtrField<::user_service::NotificationClient>& clients) {
   if (!conn_.is_open()) {
     throw std::runtime_error{"Connection failed"};
   }
@@ -90,23 +90,27 @@ void DbManager::setClients(const std::string& token,
   pqxx::work query(conn_);
   pqxx::result query_result;
 
+  json clients_json;
+  to_json(clients_json, clients);
+
   try {
+
     query_result =
-        query.exec_prepared0("set_clients", token, clients.to_json());
+        query.exec_prepared0("set_clients", token, clients_json.is_null() ? "{}" : clients_json.dump());
     query.commit();
   } catch (std::runtime_error& e) {
     throw UserNotFound{"User not found"};
   }
 }
 
-NotificationClients DbManager::getClients(const std::string& token) {
+void DbManager::getClients(const std::string& token, ::google::protobuf::RepeatedPtrField<::user_service::NotificationClient>* clients) {
   if (!conn_.is_open()) {
     throw std::runtime_error{"Connection failed"};
   }
 
   pqxx::work query(conn_);
   pqxx::row query_result;
-  NotificationClients clients{};
+//  auto clients = new ::google::protobuf::RepeatedPtrField<::user_service::NotificationClient>{};
 
   try {
     query_result = query.exec_prepared1("get_clients", token);
@@ -119,7 +123,7 @@ NotificationClients DbManager::getClients(const std::string& token) {
 
   auto query_clients =
       query_result.at(query_result.column_number("clients")).as<std::string>();
-  clients.from_json(query_clients);
 
-  return clients;
+  json clients_json = json::parse(query_clients);
+  from_json(clients_json, *clients);
 }

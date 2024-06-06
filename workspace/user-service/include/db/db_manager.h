@@ -1,11 +1,9 @@
 #pragma once
 
 #include <config/db_option.hpp>
-#include <notification-clients/notification-clients.hpp>
+#include <notification-client/notification-client-json.hpp>
 #include <pqxx/pqxx>
 #include <string>
-
-#include "db_exception.h"
 
 class DbManager {
  public:
@@ -15,8 +13,8 @@ class DbManager {
   std::string addUser(const std::string login, const std::string password);
   std::string getUuid(const std::string login, const std::string password);
 
-  void setClients(const std::string& token, const NotificationClients& clients);
-  NotificationClients getClients(const std::string& token);
+  void setClients(const std::string& token, const ::google::protobuf::RepeatedPtrField<::user_service::NotificationClient>& clients);
+  void getClients(const std::string& token, ::google::protobuf::RepeatedPtrField<::user_service::NotificationClient>* clients);
 
  private:
   pqxx::connection conn_;
