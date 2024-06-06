@@ -9,6 +9,9 @@ ListView {
     model: ContactModel
     spacing: 10
 
+    Component.onCompleted: AppBackend.getContacts()
+    Component.onDestruction: AppBackend.setContacts()
+
     delegate: ItemDelegate {
         id: itemDelegate
         width: contactListView.width

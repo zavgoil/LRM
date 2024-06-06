@@ -11,7 +11,7 @@ import QtQuick.Dialogs
 
 Window {
     id: root
-    property string defaultPage: "SignUpPage.qml"
+    property string defaultPage: "SignInPage.qml"
     
     width: 1280
     height: 960

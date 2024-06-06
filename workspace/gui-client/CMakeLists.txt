@@ -10,11 +10,12 @@ qt_standard_project_setup()
 
 qt_add_executable(appgui-client
     src/main.cpp
+    src/gui-client/gui-client.cpp
 
     include/app-backend/app-backend.hpp
     src/app-backend/app-backend.cpp
 
-    include/app-backend/contact_list_model.hpp
+    include/app-backend/contact-list-model.hpp
 )
 
 target_include_directories(appgui-client PUBLIC include include/app-backend)
