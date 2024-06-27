@@ -1,0 +1,8 @@
+db:
+  connection_uri: "postgresql://root:root@172.21.0.10/telegram_users?sslmode=disable"
+  
+kafka:
+  broker: "localhost:9092"
+
+telegram:
+  bot_token: "7062049981:AAGpiVOSnEV31KjOGlvROEeKx67QFMQe2EA"
