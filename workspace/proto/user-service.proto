@@ -63,7 +63,7 @@ message GetNotificationClientsResponse {
 }
 
 // Alert Service
-service Alert {
+service AlertService {
     rpc Alert (AlertRequest) returns (AlertResponse) {}
 }
 
@@ -72,5 +72,5 @@ message AlertRequest {
 }
 
 message AlertResponse {
-    string alert_count = 1;
+    int32 alert_count = 1;
 }
