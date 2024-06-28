@@ -28,8 +28,7 @@ class AppBackend : public QObject {
   Q_INVOKABLE void getContacts();
   Q_INVOKABLE void setContacts();
 
-  // std::vector<Contact> getContacts();
-  // void setContacts(std::vector<Contact> contacts);
+  Q_INVOKABLE void alert();
 
  signals:
   void openLoadingPopup();
@@ -46,6 +45,7 @@ class AppBackend : public QObject {
 
   ContactListModel* contact_list_model_;
 
+  std::unique_ptr<user_service::AlertService::Stub> alert_service_{nullptr};
   std::unique_ptr<user_service::AuthService::Stub> auth_service_{nullptr};
   std::unique_ptr<user_service::NotificationClientService::Stub>
       notif_client_service_{nullptr};

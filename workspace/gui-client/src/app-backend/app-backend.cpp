@@ -3,7 +3,9 @@
 #include <thread>
 #include <util/guard.hpp>
 
-AppBackend::AppBackend(int argc, char* argv[], ContactListModel* contact_list_model): contact_list_model_(contact_list_model) {
+AppBackend::AppBackend(int argc, char* argv[],
+                       ContactListModel* contact_list_model)
+    : contact_list_model_(contact_list_model) {
   config_.read(argc, argv);
   auth_service_ = std::make_unique<user_service::AuthService::Stub>(
       grpc::CreateChannel(config_.rpc_map.user_service.uri + ":" +
@@ -15,6 +17,10 @@ AppBackend::AppBackend(int argc, char* argv[], ContactListModel* contact_list_mo
               config_.rpc_map.user_service.uri + ":" +
                   std::to_string(config_.rpc_map.user_service.port),
               grpc::InsecureChannelCredentials()));
+  alert_service_ = std::make_unique<user_service::AlertService::Stub>(
+      grpc::CreateChannel(config_.rpc_map.user_service.uri + ":" +
+                              std::to_string(config_.rpc_map.user_service.port),
+                          grpc::InsecureChannelCredentials()));
 }
 
 void AppBackend::signIn(const QString& username, const QString& password) {
@@ -118,8 +124,10 @@ void AppBackend::getContacts() {
           "Error " + std::to_string(status.error_code()) + ":" +
           status.error_message()));
     } else {
-      qDebug() << "getContacts:: Success. Clients Size - " << response.clients().size();
-      google::protobuf::RepeatedPtrField<user_service::NotificationClient> clients(response.clients());
+      qDebug() << "getContacts:: Success. Clients Size - "
+               << response.clients().size();
+      google::protobuf::RepeatedPtrField<user_service::NotificationClient>
+          clients(response.clients());
       contact_list_model_->setContacts(std::move(clients));
     }
   });
@@ -157,7 +165,42 @@ void AppBackend::setContacts() {
           "Error " + std::to_string(status.error_code()) + ":" +
           status.error_message()));
     } else {
-      qDebug() << "setContacts:: Success. Clients Size - " << response.client_count();
+      qDebug() << "setContacts:: Success. Clients Size - "
+               << response.client_count();
     }
   });
+}
+
+void AppBackend::alert() {
+  user_service::AlertRequest request{};
+
+  if (alert_service_ == nullptr) {
+    qDebug() << "Error: Alert service not inited";
+    emit showError("Error: Alert service not inited");
+    return;
+  }
+  request.set_user_token(token_);
+
+  if (worker_.joinable()) worker_.join();
+  worker_ = std::thread(
+      [this](const user_service::AlertRequest&& request) {
+        Guard g(std::bind(&AppBackend::closeLoadingPopup, this));
+        emit openLoadingPopup();
+
+        grpc::ClientContext context{};
+        user_service::AlertResponse response{};
+
+        auto status = alert_service_->Alert(&context, request, &response);
+        if (!status.ok()) {
+          qDebug() << "Error " << status.error_code() << ":"
+                   << status.error_message();
+          emit showError(QString::fromStdString(
+              "Error " + std::to_string(status.error_code()) + ":" +
+              status.error_message()));
+        } else {
+          qDebug() << "Success. Alert count - " << response.alert_count();
+          emit signUpDone();
+        }
+      },
+      std::move(request));
 }

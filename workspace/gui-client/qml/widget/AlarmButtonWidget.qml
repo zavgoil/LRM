@@ -2,6 +2,8 @@ import QtQuick 2.15
 import QtQuick.Controls 2.15
 import QtQuick.Layouts
 
+import app
+
 Rectangle {
     Layout.alignment: Qt.AlignHCenter | Qt.AlignVCenter
     Layout.preferredHeight: Math.min(parent.height, parent.width) * 0.4
@@ -13,7 +15,7 @@ Rectangle {
     MouseArea {
         anchors.fill: parent
         onClicked: {
-            console.log("Кнопка сигнализации нажата.")
+            AppBackend.alert()
         }
     }
 
