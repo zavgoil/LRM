@@ -2,6 +2,8 @@
 
 #include "for_each_macro.hpp"
 
+// Вспомогательные макросы для сериализаторов/десериализаторов для YAML
+
 #define YAML_FORMAT_TO(field) yaml_node[#field] = obj.field;
 #define YAML_FORMAT_FROM(field) \
   obj.field = yaml_node[#field].as<decltype(obj.field)>();

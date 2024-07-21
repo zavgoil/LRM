@@ -14,11 +14,18 @@ type Config struct {
 }
 
 type DB struct {
-	ConnectionURI string `yaml:"connection_uri"`
+	DbName                string `yaml:"db_name"`
+	Username              string `yaml:"user"`
+	Password              string `yaml:"password"`
+	Host                  string `yaml:"host"`
+	Port                  int    `yaml:"port"`
+	TelegramUserTableName string `yaml:"telegram_user_table_name"`
 }
 
 type KafkaConfig struct {
-	KafkaBroker string `yaml:"broker"`
+	KafkaBroker               string `yaml:"broker"`
+	TelegramNotificationTopic string `yaml:"telegram_notification_topic"`
+	ConsumerGroup             string `yaml:"consumer_group"`
 }
 
 type TelegramConfig struct {

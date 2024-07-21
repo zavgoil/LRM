@@ -62,9 +62,6 @@ target_link_libraries(appgui-client
     project-util::project-util
 )
 
-target_compile_definitions(appgui-client PRIVATE 
-                           RPC_MAP_PATH="${PROJECT_UTIL_RPC_MAP_PATH}")
-
 include(GNUInstallDirs)
 install(TARGETS appgui-client
     BUNDLE DESTINATION .

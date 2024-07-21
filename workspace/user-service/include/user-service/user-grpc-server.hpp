@@ -27,7 +27,11 @@ class UserGrpcServer {
     server_ = std::unique_ptr(builder_.BuildAndStart());
   }
 
+  /// @brief дождаться окончания работы gRPC сервера (пока не случиться ошибка,
+  /// либо не прервут работу)
   void wait() { server_->Wait(); }
+
+  /// @brief завершить работу сервера
   void shutdown() { server_->Shutdown(); }
 
   ~UserGrpcServer() { shutdown(); }

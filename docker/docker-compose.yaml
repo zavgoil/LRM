@@ -1,55 +1,40 @@
 version: '3.9'
 
 services:
-
-  # Postgres 172.21.0.0/24
-
   db:
     image: postgres
-    # restart: always
-    # set shared memory limit when using docker-compose
-    shm_size: 128mb
-    # or set shared memory limit when deploy via swarm stack
-    #volumes:
-    #  - type: tmpfs
-    #    target: /dev/shm
-    #    tmpfs:
-    #      size: 134217728 # 128*2^20 bytes = 128Mb
+    container_name: db
     environment:
-      POSTGRES_USER: root
-      POSTGRES_PASSWORD: root
-      POSTGRES_DB: test_db
-    # ports:
-    #   - 5432:5432
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
     networks:
-      db:
-        ipv4_address: 172.21.0.10
+      - db_net
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U postgres" ]
+      interval: 5s
+      timeout: 40s
+      retries: 5
 
   pgadmin:
     image: dpage/pgadmin4
     environment:
       PGADMIN_DEFAULT_EMAIL: root@root.com
       PGADMIN_DEFAULT_PASSWORD: root
-    # ports:
-    #   - 5050:80
+    ports:
+      - 5050:80
     networks:
-      db:
-        ipv4_address: 172.21.0.100
-
-  # Kafka 172.22.0.0/24
+      - db_net
 
   zookeeper:
     image: confluentinc/cp-zookeeper:7.2.1
     hostname: zookeeper
     container_name: zookeeper
-    # ports:
-    #   - "2181:2181"
     environment:
       ZOOKEEPER_CLIENT_PORT: 2181
       ZOOKEEPER_TICK_TIME: 2000
     networks:
-      kafka:
-        ipv4_address: 172.22.0.10
+      - kafka_net
 
   kafka:
     image: confluentinc/cp-server:7.2.1
@@ -57,14 +42,11 @@ services:
     container_name: kafka
     depends_on:
       - zookeeper
-    ports:
-      - "9092:9092"
-    #   - "9997:9997"
     environment:
       KAFKA_BROKER_ID: 1
       KAFKA_ZOOKEEPER_CONNECT: 'zookeeper:2181'
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
-      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:29092,PLAINTEXT_HOST://172.22.0.20:9092
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:29092,PLAINTEXT_HOST://kafka:9092
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
       KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
       KAFKA_CONFLUENT_LICENSE_TOPIC_REPLICATION_FACTOR: 1
@@ -74,64 +56,81 @@ services:
       KAFKA_JMX_PORT: 9997
       KAFKA_JMX_HOSTNAME: kafka
     networks:
-      kafka:
-        ipv4_address: 172.22.0.20
+      - kafka_net
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "kafka-topics --list --bootstrap-server kafka:9092"
+        ]
+      interval: 5s
+      timeout: 60s
+      retries: 5
 
   kafka-ui:
     container_name: kafka-ui
     image: provectuslabs/kafka-ui:latest
-    # ports:
-    #   - 8082:8080
+    ports:
+      - 8082:8080
     environment:
       DYNAMIC_CONFIG_ENABLED: 'true'
     networks:
-      kafka:
-        ipv4_address: 172.22.0.30
-
-  # user-service
+      - kafka_net
 
   user-service:
     container_name: user-service
-    depends_on:
-      - kafka
-      - db
     build:
       context: ./../
       dockerfile: docker/user-service/Dockerfile
       target: runner
-    networks:
+    ports:
+      - "50051:50051"
+    environment:
+      DB_NAME: ${POSTGRES_DB}
+      DB_USERNAME: ${POSTGRES_USER}
+      DB_PASSWORD: ${POSTGRES_PASSWORD}
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_USER_TABLE_NAME: "app_user"
+      KAFKA_BROKERS: ${KAFKA_BROKERS}
+      KAFKA_TELEGRAM_NOTIFICATION_TOPIC: ${KAFKA_TELEGRAM_NOTIFICATION_TOPIC}
+    depends_on:
       kafka:
-        ipv4_address: 172.22.0.40
+        condition: service_healthy
       db:
-        ipv4_address: 172.21.0.40
-
-  # telegram-notifier
+        condition: service_healthy
+    networks:
+      - kafka_net
+      - db_net
 
   telegram-notifier:
     container_name: telegram-notifier
-    depends_on:
-      - kafka
-      - db
     build:
       context: ./../
       dockerfile: docker/telegram-notifier/Dockerfile
       target: runner
-    networks:
+    environment:
+      DB_NAME: ${POSTGRES_DB}
+      DB_USERNAME: ${POSTGRES_USER}
+      DB_PASSWORD: ${POSTGRES_PASSWORD}
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_TELEGRAM_USER_TABLE_NAME: "telegram_users"
+      KAFKA_BROKERS: ${KAFKA_BROKERS}
+      KAFKA_TELEGRAM_NOTIFICATION_TOPIC: ${KAFKA_TELEGRAM_NOTIFICATION_TOPIC}
+      KAFKA_CONSUMER_GROUP: "telegram_notifier"
+      TELEGRAM_BOT_TOKEN: ${TELEGRAM_BOT_TOKEN}
+    depends_on:
       kafka:
-        ipv4_address: 172.22.0.50
+        condition: service_healthy
       db:
-        ipv4_address: 172.21.0.50
+        condition: service_healthy
+    networks:
+      - kafka_net
+      - db_net
 
 networks:
-  db:
+  db_net:
     driver: bridge
-    ipam:
-      config:
-        - subnet: 172.21.0.0/24
-          gateway: 172.21.0.1
-  kafka:
+  kafka_net:
     driver: bridge
-    ipam:
-      config:
-        - subnet: 172.22.0.0/24
-          gateway: 172.22.0.1

@@ -86,5 +86,10 @@ ENV RPC_MAP_PATH=/usr/local/share/project-util/config/rpc_map.yaml
 ENV DB_OPTION_PATH=/usr/local/share/user-service/config/db_option.yaml
 ENV KAFKA_OPTION_PATH=/usr/local/share/user-service/config/kafka_option.yaml
 
-ENTRYPOINT [ "user-service" ]
+COPY --chmod=+x ./docker/script/create_rpc_map_config.sh /create_rpc_map_config.sh
+COPY --chmod=+x ./docker/user-service/script/create_db_config.sh /create_db_config.sh
+COPY --chmod=+x ./docker/user-service/script/create_kafka_config.sh /create_kafka_config.sh
+COPY --chmod=+x ./docker/user-service/script/entrypoint.sh /entrypoint.sh
+
+ENTRYPOINT [ "/entrypoint.sh" ]
 

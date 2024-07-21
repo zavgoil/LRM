@@ -26,11 +26,6 @@ install (TARGETS project-util EXPORT project-utilTargets
     INCLUDES DESTINATION include
 )
 
-install(DIRECTORY 
-    ${CMAKE_CURRENT_SOURCE_DIR}/config/ 
-    DESTINATION 
-    share/project-util/config)
-
 install (EXPORT project-utilTargets
         NAMESPACE project-util::
         DESTINATION lib/cmake/project-util

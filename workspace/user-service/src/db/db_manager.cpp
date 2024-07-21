@@ -7,10 +7,11 @@
 #include "util/log.hpp"
 
 DbManager::DbManager(const DbOption& db_option) {
-  auto conn_str = "dbname=" + db_option.db_name + " user=" + db_option.user +
-                  " password=" + db_option.password +
-                  " hostaddr=" + db_option.host +
-                  " port=" + std::to_string(db_option.port) + "";
+  auto conn_str =
+      "dbname=" + db_option.db_name + " user=" + db_option.user +
+      " password=" + db_option.password + " host=" + db_option.host +
+      " port=" + std::to_string(db_option.port) + " connect_timeout=5";
+
   util::Log::warn(conn_str);
   conn_ = std::make_unique<pqxx::connection>(conn_str);
   if (!conn_->is_open()) throw std::runtime_error{"Connection failed"};

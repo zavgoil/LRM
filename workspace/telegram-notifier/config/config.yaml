@@ -1,8 +1,15 @@
 db:
-  connection_uri: "postgresql://root:root@172.21.0.10/telegram_users?sslmode=disable"
-  
+  db_name: "user-service"
+  user: "dev"
+  password: "dev"
+  host: "db"
+  port: 5432
+  telegram_user_table_name: "telegram_user"
+
 kafka:
-  broker: "localhost:9092"
+  broker: "kafka:9092"
+  telegram_notification_topic: "telegram_notification"
+  consumer_group: "telegram_notifier"
 
 telegram:
-  bot_token: "7062049981:AAGpiVOSnEV31KjOGlvROEeKx67QFMQe2EA"
+  bot_token: "<INSERT YOUR TOKEN>"

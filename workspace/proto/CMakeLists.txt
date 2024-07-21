@@ -5,7 +5,7 @@ find_package(protobuf CONFIG REQUIRED)
 find_package(gRPC CONFIG REQUIRED)
 
 set(PROTO_FILES
-    user-service.proto)
+    proto/user-service.proto)
 
 set(PROTO_PATH ${CMAKE_CURRENT_BINARY_DIR}/include/proto)
 
@@ -30,8 +30,8 @@ protobuf_generate(TARGET proto
     PROTOC_OUT_DIR ${PROTO_PATH})
 
 target_include_directories(proto PUBLIC 
-    "$<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/include>" 
-    "$<INSTALL_INTERFACE:${CMAKE_INSTALL_PREFIX}/include>")
+    "$<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/include/proto>" 
+    "$<INSTALL_INTERFACE:${CMAKE_INSTALL_PREFIX}/include/proto>")
 
 install(DIRECTORY 
     ${CMAKE_CURRENT_BINARY_DIR}/include/ 
@@ -47,6 +47,12 @@ install (EXPORT protoTargets
         NAMESPACE proto::
         DESTINATION lib/cmake/proto
 )
+
+install(DIRECTORY 
+    ${CMAKE_CURRENT_SOURCE_DIR}/config/ 
+    DESTINATION 
+    share/project-util/config)
+
 
 configure_file(
     ${CMAKE_CURRENT_SOURCE_DIR}/cmake/config.cmake.in

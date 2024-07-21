@@ -1,6 +1,6 @@
-db_name: "danger-signals"
-user: "root"
-password: "root"
-host: "172.21.0.10"
+db_name: "user-service"
+user: "dev"
+password: "dev"
+host: "db"
 port: 5432
-user_table_name: "app.user"
+user_table_name: "app_user"

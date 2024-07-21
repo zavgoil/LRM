@@ -14,18 +14,16 @@ type TelegramNotificationConsumer struct {
 	bot    *bot.Bot
 }
 
-const topic = "telegram_notification"
-const consumerGroup = "telegram_notifier"
 const maxBytes = 10e6
 
-func New(broker string, bot *bot.Bot) (*TelegramNotificationConsumer, error) {
+func New(broker string, bot *bot.Bot, telegramNotificationTopic string, consumerGroup string) (
+	*TelegramNotificationConsumer, error) {
 	reader := kafka.NewReader(kafka.ReaderConfig{
 		Brokers:  []string{broker},
-		Topic:    topic,
+		Topic:    telegramNotificationTopic,
 		GroupID:  consumerGroup,
 		MaxBytes: maxBytes,
 	})
-
 	return &TelegramNotificationConsumer{reader: reader, bot: bot}, nil
 }
 
@@ -34,8 +32,6 @@ func (t *TelegramNotificationConsumer) Close() {
 }
 
 func (t *TelegramNotificationConsumer) Run(ctx context.Context) {
-	// ctx, cancel := context.WithCancel(context.Background())
-
 	for {
 		m, err := t.reader.ReadMessage(ctx)
 		if err != nil {

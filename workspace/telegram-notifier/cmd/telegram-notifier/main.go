@@ -17,7 +17,9 @@ func main() {
 	signal.Notify(signals, os.Interrupt)
 	ctx, cancel := context.WithCancel(context.Background())
 
-	telegram_users_storage, err := telegram_users_postgre.New(cfg.DB.ConnectionURI)
+	telegram_users_storage, err := telegram_users_postgre.New(
+		cfg.DB.Host, cfg.DB.DbName, cfg.DB.Username,
+		cfg.DB.Password, cfg.DB.Port, cfg.DB.TelegramUserTableName)
 	if err != nil {
 		panic(err)
 	}
@@ -29,7 +31,8 @@ func main() {
 	}
 	go bot.Run(ctx)
 
-	telegram_notification_consumer, err := telegram_notification_consumer.New(cfg.KafkaBroker, bot)
+	telegram_notification_consumer, err := telegram_notification_consumer.New(
+		cfg.KafkaBroker, bot, cfg.TelegramNotificationTopic, cfg.ConsumerGroup)
 	if err != nil {
 		panic(err)
 	}
