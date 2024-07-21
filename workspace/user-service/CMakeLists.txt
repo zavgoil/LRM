@@ -1,6 +1,15 @@
 cmake_minimum_required(VERSION 3.22)
-
 project(user-service)
+
+if(PROJECT_IS_TOP_LEVEL)
+    find_package(nlohmann_json REQUIRED)
+    find_package(libpqxx REQUIRED)
+    find_package(proto REQUIRED)
+    find_package(project-util REQUIRED)
+else()
+    add_library(libpqxx::pqxx ALIAS pqxx)
+endif()
+
 set(CMAKE_CXX_STANDARD 17)
 set(SRC_FILES src/user-service/user-service.cpp
               src/user-service/auth-grpc-service.cpp
@@ -11,13 +20,24 @@ set(SRC_FILES src/user-service/user-service.cpp
               src/kafka/telegram_notification_producer.cpp
               src/util/log.cpp)
 
-
 add_executable(user-service src/main.cpp
                             ${SRC_FILES})
-target_include_directories(user-service PRIVATE include/)
-target_link_libraries(user-service PRIVATE project-util proto pqxx rdkafka++)
+target_include_directories(user-service PRIVATE 
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>)
+target_link_libraries(user-service PRIVATE 
+    project-util::project-util 
+    proto::proto 
+    libpqxx::pqxx 
+    rdkafka++)
 
-target_compile_definitions(user-service PRIVATE 
-                           RPC_MAP_PATH="${PROJECT_UTIL_RPC_MAP_PATH}"
-                           DB_OPTION_PATH="${CMAKE_CURRENT_SOURCE_DIR}/config/db_option.yaml"
-                           KAFKA_OPTION_PATH="${CMAKE_CURRENT_SOURCE_DIR}/config/kafka_option.yaml")
+install (TARGETS user-service EXPORT user-serviceTargets
+    ARCHIVE DESTINATION lib
+    LIBRARY DESTINATION lib
+    RUNTIME DESTINATION bin
+    INCLUDES DESTINATION include
+    )
+
+install(DIRECTORY 
+    ${CMAKE_CURRENT_SOURCE_DIR}/config/ 
+    DESTINATION 
+    share/user-service/config)

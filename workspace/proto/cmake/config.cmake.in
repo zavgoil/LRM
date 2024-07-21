@@ -1,0 +1,8 @@
+@PACKAGE_INIT@
+
+include(CMakeFindDependencyMacro)
+
+find_dependency(protobuf)
+find_dependency(gRPC)
+
+include("${CMAKE_CURRENT_LIST_DIR}/protoTargets.cmake")

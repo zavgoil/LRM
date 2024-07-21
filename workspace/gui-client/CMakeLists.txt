@@ -1,27 +1,31 @@
 cmake_minimum_required(VERSION 3.16)
-
 project(gui-client VERSION 0.1 LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
-
 find_package(Qt6 6.4 REQUIRED COMPONENTS Quick QuickControls2)
 
-qt_standard_project_setup()
+if(PROJECT_IS_TOP_LEVEL)
+    find_package(proto REQUIRED)
+    find_package(project-util REQUIRED)
+endif()
 
+qt_standard_project_setup()
 qt_add_executable(appgui-client
     src/main.cpp
     src/gui-client/gui-client.cpp
-
-    include/app-backend/app-backend.hpp
     src/app-backend/app-backend.cpp
 
+    include/app-backend/app-backend.hpp
     include/app-backend/contact-list-model.hpp
 )
+target_include_directories(appgui-client PUBLIC 
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include> 
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/app-backend>)
 
-target_include_directories(appgui-client PUBLIC include include/app-backend)
 qt_add_qml_module(appgui-client
     URI app
     VERSION 1.0
+    RESOURCE_PREFIX /qt/qml
     QML_FILES 
     qml/Main.qml
 
@@ -51,7 +55,11 @@ set_target_properties(appgui-client PROPERTIES
 )
 
 target_link_libraries(appgui-client
-    PRIVATE Qt6::Quick Qt6::QuickControls2 proto project-util
+    PRIVATE 
+    Qt6::Quick 
+    Qt6::QuickControls2 
+    proto::proto 
+    project-util::project-util
 )
 
 target_compile_definitions(appgui-client PRIVATE 

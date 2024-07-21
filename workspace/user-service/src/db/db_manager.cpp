@@ -6,37 +6,61 @@
 #include "db/db_exception.h"
 #include "util/log.hpp"
 
-DbManager::DbManager(const DbOption& db_option)
-    : conn_{db_option.uri + "/" + db_option.name} {
-  if (!conn_.is_open()) throw std::runtime_error{"Connection failed"};
-  prepareQuery(db_option.schema + "." + db_option.user_table_name);
+DbManager::DbManager(const DbOption& db_option) {
+  auto conn_str = "dbname=" + db_option.db_name + " user=" + db_option.user +
+                  " password=" + db_option.password +
+                  " hostaddr=" + db_option.host +
+                  " port=" + std::to_string(db_option.port) + "";
+  util::Log::warn(conn_str);
+  conn_ = std::make_unique<pqxx::connection>(conn_str);
+  if (!conn_->is_open()) throw std::runtime_error{"Connection failed"};
+
+  try {
+    pqxx::work query(*conn_.get());
+    query.exec0(
+        "CREATE TABLE IF NOT EXISTS " + db_option.user_table_name +
+        "("
+        "uuid uuid NOT NULL,"
+        "login character(255) COLLATE pg_catalog.\"default\" NOT NULL,"
+        "password character(255) COLLATE pg_catalog.\"default\" NOT NULL,"
+        "clients json DEFAULT '{}'::json,"
+        "CONSTRAINT user_pkey PRIMARY KEY (uuid, login),"
+        "CONSTRAINT user_login_key UNIQUE (login),"
+        "CONSTRAINT user_uuid_key UNIQUE (uuid)"
+        ")");
+    query.commit();
+  } catch (const std::exception& e) {
+    throw std::runtime_error{"Error create table: " + std::string(e.what())};
+  }
+
+  prepareQuery(db_option.user_table_name);
 }
 
 void DbManager::prepareQuery(std::string table_name) {
-  conn_.prepare(
+  conn_->prepare(
       "insert_user",
       "INSERT INTO " + table_name +
           " (uuid, login, password) VALUES (gen_random_uuid(), $1, $2);");
 
-  conn_.prepare("get_uuid", "SELECT * FROM " + table_name + " WHERE login=$1");
+  conn_->prepare("get_uuid", "SELECT * FROM " + table_name + " WHERE login=$1");
 
-  conn_.prepare("set_clients", "UPDATE " + table_name +
-                                   " SET clients = $2::json WHERE uuid=$1;");
+  conn_->prepare("set_clients", "UPDATE " + table_name +
+                                    " SET clients = $2::json WHERE uuid=$1;");
 
-  conn_.prepare("get_clients",
-                "SELECT clients FROM " + table_name + " WHERE uuid=$1;");
+  conn_->prepare("get_clients",
+                 "SELECT clients FROM " + table_name + " WHERE uuid=$1;");
 }
 
 DbManager::~DbManager() {
-  if (conn_.is_open()) conn_.close();
+  if (conn_->is_open()) conn_->close();
 }
 
 std::string DbManager::addUser(const std::string login,
                                const std::string password) {
-  if (!conn_.is_open()) {
+  if (!conn_->is_open()) {
     throw std::runtime_error{"Connection failed"};
   }
-  pqxx::work query(conn_);
+  pqxx::work query(*conn_.get());
 
   try {
     // TODO: вынести шифрование на уровень клиента
@@ -56,11 +80,11 @@ std::string DbManager::addUser(const std::string login,
 
 std::string DbManager::getUuid(const std::string login,
                                const std::string password) {
-  if (!conn_.is_open()) {
+  if (!conn_->is_open()) {
     throw std::runtime_error{"Connection failed"};
   }
 
-  pqxx::work query(conn_);
+  pqxx::work query(*conn_.get());
   pqxx::row query_result;
   try {
     query_result = query.exec_prepared1("get_uuid", login);
@@ -85,11 +109,11 @@ std::string DbManager::getUuid(const std::string login,
 void DbManager::setClients(const std::string& token,
                            const ::google::protobuf::RepeatedPtrField<
                                ::user_service::NotificationClient>& clients) {
-  if (!conn_.is_open()) {
+  if (!conn_->is_open()) {
     throw std::runtime_error{"Connection failed"};
   }
 
-  pqxx::work query(conn_);
+  pqxx::work query(*conn_.get());
   pqxx::result query_result;
 
   json clients_json;
@@ -109,11 +133,11 @@ void DbManager::getClients(
     const std::string& token,
     ::google::protobuf::RepeatedPtrField<::user_service::NotificationClient>*
         clients) {
-  if (!conn_.is_open()) {
+  if (!conn_->is_open()) {
     throw std::runtime_error{"Connection failed"};
   }
 
-  pqxx::work query(conn_);
+  pqxx::work query(*conn_.get());
   pqxx::row query_result;
   //  auto clients = new
   //  ::google::protobuf::RepeatedPtrField<::user_service::NotificationClient>{};

@@ -1,2 +1,2 @@
-brokers: "localhost:9092"
+brokers: "172.22.0.20:9092"
 telegram_notification_topic: "telegram_notification"

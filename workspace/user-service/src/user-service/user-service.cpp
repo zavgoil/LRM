@@ -1,5 +1,7 @@
 #include "user-service/user-service.hpp"
 
+#include <csignal>
+
 #include "util/log.hpp"
 
 int UserService::run(int argc, char const *argv[]) {
@@ -22,11 +24,17 @@ int UserService::run(int argc, char const *argv[]) {
   return 0;
 }
 
-// #TODO: добавить возможность указывать конфиги при запуске
 Config UserService::getConfig(int argc, char const *argv[]) {
   Config config;
-  config.rpc_map.from_yaml_file(RPC_MAP_PATH);
-  config.db_option.from_yaml_file(DB_OPTION_PATH);
-  config.kafka_option.from_yaml_file(KAFKA_OPTION_PATH);
+  static auto getEnv = [](const std::string &env_name) {
+    const char *result = std::getenv(env_name.c_str());
+    if (!result)
+      throw std::runtime_error("UserService::getConfig: " + env_name +
+                               " env not found");
+    return result;
+  };
+  config.rpc_map.from_yaml_file(getEnv("RPC_MAP_PATH"));
+  config.db_option.from_yaml_file(getEnv("DB_OPTION_PATH"));
+  config.kafka_option.from_yaml_file(getEnv("KAFKA_OPTION_PATH"));
   return config;
 }

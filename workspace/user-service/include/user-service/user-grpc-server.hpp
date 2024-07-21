@@ -28,8 +28,9 @@ class UserGrpcServer {
   }
 
   void wait() { server_->Wait(); }
+  void shutdown() { server_->Shutdown(); }
 
-  ~UserGrpcServer() { server_->Shutdown(); }
+  ~UserGrpcServer() { shutdown(); }
 
  private:
   grpc::ServerBuilder builder_;
