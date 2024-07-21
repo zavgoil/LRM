@@ -102,6 +102,7 @@ services:
     networks:
       - kafka_net
       - db_net
+      - user_service_net
 
   telegram-notifier:
     container_name: telegram-notifier
@@ -129,8 +130,26 @@ services:
       - kafka_net
       - db_net
 
+  gui-client:
+    container_name: gui-client
+    build:
+      context: ./../
+      dockerfile: docker/gui-client/Dockerfile
+      target: runner
+    environment:
+      - DISPLAY=$DISPLAY
+      - QT_X11_NO_MITSHM=1
+    volumes:
+      - /tmp/.X11-unix:/tmp/.X11-unix:rw
+    depends_on:
+      - user-service
+    networks:
+      - user_service_net
+
 networks:
   db_net:
     driver: bridge
   kafka_net:
+    driver: bridge
+  user_service_net:
     driver: bridge
