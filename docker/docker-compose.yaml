@@ -60,9 +60,6 @@ services:
     ports:
       - "9092:9092"
     #   - "9997:9997"
-    networks:
-      kafka:
-        ipv4_address: 172.22.0.20
     environment:
       KAFKA_BROKER_ID: 1
       KAFKA_ZOOKEEPER_CONNECT: 'zookeeper:2181'
@@ -76,6 +73,9 @@ services:
       KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
       KAFKA_JMX_PORT: 9997
       KAFKA_JMX_HOSTNAME: kafka
+    networks:
+      kafka:
+        ipv4_address: 172.22.0.20
 
   kafka-ui:
     container_name: kafka-ui
@@ -86,7 +86,41 @@ services:
       DYNAMIC_CONFIG_ENABLED: 'true'
     networks:
       kafka:
-        ipv4_address: 172.22.0.100
+        ipv4_address: 172.22.0.30
+
+  # user-service
+
+  user-service:
+    container_name: user-service
+    depends_on:
+      - kafka
+      - db
+    build:
+      context: ./../
+      dockerfile: docker/user-service/Dockerfile
+      target: runner
+    networks:
+      kafka:
+        ipv4_address: 172.22.0.40
+      db:
+        ipv4_address: 172.21.0.40
+
+  # telegram-notifier
+
+  telegram-notifier:
+    container_name: telegram-notifier
+    depends_on:
+      - kafka
+      - db
+    build:
+      context: ./../
+      dockerfile: docker/telegram-notifier/Dockerfile
+      target: runner
+    networks:
+      kafka:
+        ipv4_address: 172.22.0.50
+      db:
+        ipv4_address: 172.21.0.50
 
 networks:
   db:
