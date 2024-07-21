@@ -1,12 +1,29 @@
 @startuml Component
 
+component UserGUI as user_gui
+
 component UserService as user_service
 database UserServiceDB as user_service_db
-component NotificationService as notif_service
-component GraphicalUserInterfaceClient as gui_client
 
-gui_client -> user_service
-user_service --> notif_service
-user_service --> user_service_db
+component NotificationService as notif_service
+database NotificationDB as notification_db
+
+component TelegramNotifier as tg_notif
+database TelegramNotifierDB as tg_notif_db
+
+component InternalNotifier as internal_notif
+
+component EmailNotifier as email_notif
+
+user_gui -> user_service : gRPC
+user_service -> user_service_db
+user_service --> notif_service : gRPC
+
+notif_service -> notification_db
+notif_service --> tg_notif : Kafka
+notif_service --> internal_notif : Kafka
+notif_service --> email_notif : Kafka
+
+tg_notif -> tg_notif_db
 
 @enduml
