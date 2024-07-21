@@ -1,0 +1,15 @@
+syntax = "proto3";
+
+package notification_service;
+
+// Internal Alert Service
+service InternalAlert {
+    rpc InternalAlert (InternalAlertRequest) returns (InternalAlertResponse) {}
+}
+
+message InternalAlertRequest {
+    string user_token = 1;
+}
+
+message InternalAlertResponse {
+}

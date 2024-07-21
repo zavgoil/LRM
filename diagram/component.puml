@@ -1,0 +1,12 @@
+@startuml Component
+
+component UserService as user_service
+database UserServiceDB as user_service_db
+component NotificationService as notif_service
+component GraphicalUserInterfaceClient as gui_client
+
+gui_client -> user_service
+user_service --> notif_service
+user_service --> user_service_db
+
+@enduml

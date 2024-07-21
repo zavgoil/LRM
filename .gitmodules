@@ -1,7 +1,6 @@
-[submodule "workspace/3rdparty/json"]
-	path = workspace/3rdparty/json
-	url = https://github.com/nlohmann/json
-
 [submodule "workspace/3rdparty/libpqxx"]
 	path = workspace/3rdparty/libpqxx
 	url = https://github.com/jtv/libpqxx
+[submodule "workspace/3rdparty/json"]
+	path = workspace/3rdparty/json
+	url = https://github.com/nlohmann/json
